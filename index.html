@@ -21,6 +21,7 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000;--surface:#1C1C1E;--ink:#F5F5F7;--soft:#98989F;--line:#2C2C2E;--accent:#FF4F7B;--ok:#30D158;--bar:rgba(18,18,18,.86);color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#000;--surface:#1C1C1E;--ink:#F5F5F7;--soft:#98989F;--line:#2C2C2E;--accent:#FF4F7B;--ok:#30D158;--bar:rgba(18,18,18,.86);color-scheme:dark}
 *,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.4;font-size:16px}
 button,input,select,textarea{font:inherit;color:inherit}
 svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
@@ -121,7 +122,7 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 .grupo .perigo{color:#D93025}
 
 /* formulário */
-.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border-radius:9px;padding:2px;margin-bottom:16px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface);border-radius:9px;padding:2px;margin-bottom:16px}
 .seg button{border:0;background:none;border-radius:7px;padding:7px;font-size:14px;font-weight:600;cursor:pointer;color:var(--soft)}
 .seg button[aria-pressed="true"]{background:var(--bg);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .drop{display:flex;flex-direction:column;align-items:center;gap:6px;border:1px dashed var(--soft);border-radius:var(--r);padding:30px 20px;text-align:center;cursor:pointer}
@@ -221,7 +222,20 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
 <dialog id="dAdd"><div class="sheet">
   <div class="sheet-topo"><button class="link" data-fechar>Cancelar</button><h2 id="addTitulo">Novo lugar</h2><span style="width:64px"></span></div>
-  <div class="seg" id="abas"><button data-aba="print" aria-pressed="true">Por print</button><button data-aba="manual" aria-pressed="false">Escrever</button></div>
+  <div class="seg" id="abas"><button data-aba="colar" aria-pressed="true">Via Claude</button><button data-aba="print" aria-pressed="false">Automático</button><button data-aba="manual" aria-pressed="false">Escrever</button></div>
+  <div id="painelColar">
+    <div class="ed" style="display:grid;gap:12px">
+      <div><strong>1.</strong> Copie o pedido e mande junto com os prints no app do Claude.</div>
+      <button class="btn btn-sec" id="copiarPedido" type="button">Copiar pedido</button>
+      <div><strong>2.</strong> Escolha os mesmos prints, na mesma ordem, pra virarem a capa (opcional).</div>
+      <label class="drop" style="padding:18px"><input type="file" id="arquivosColar" accept="image/*" multiple><strong>Escolher prints</strong></label>
+      <div class="previas" id="previasColar"></div>
+      <div><strong>3.</strong> Cole aqui a resposta do Claude.</div>
+      <div class="campos"><label class="larga"><textarea id="textoColado" style="min-height:110px" placeholder="[ { &quot;nome&quot;: … } ]"></textarea></label></div>
+      <button class="btn btn-dark" id="lerColado" type="button">Continuar</button>
+      <p class="aviso" id="avisoColar" style="margin:0"></p>
+    </div>
+  </div>
   <div id="painelPrint">
     <label class="drop"><input type="file" id="arquivos" accept="image/*" multiple>
       <svg class="i" style="width:30px;height:30px"><use href="#i-camera"/></svg>
@@ -448,17 +462,19 @@ function abrirAdd(l=null){
   if(!podeEditar()){toast("Configure o GitHub primeiro");abrirConfig();return;}
   editando=l;imagens=[];
   $("previas").innerHTML="";$("avisoPrint").textContent="";$("avisoPrint").className="aviso";$("lerPrints").hidden=true;$("arquivos").value="";
-  $("addTitulo").textContent=l?"Editar":"Novo lugar";$("abas").hidden=!!l;aba(l?"manual":"print");
+  $("addTitulo").textContent=l?"Editar":"Novo lugar";$("abas").hidden=!!l;
+  $("textoColado").value="";$("previasColar").innerHTML="";$("arquivosColar").value="";$("avisoColar").textContent="";
+  aba(l?"manual":(cfg().key?"print":"colar"));
   if(l)$("editores").replaceChildren(editor(l));
   $("dAdd").showModal();$("dAdd").scrollTop=0;
 }
 function aba(a){
   document.querySelectorAll("#abas button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.aba===a));
-  $("painelPrint").hidden=a!=="print";
+  $("painelPrint").hidden=a!=="print"; $("painelColar").hidden=a!=="colar";
   if(editando){$("salvar").hidden=false;return;}
   if(a==="manual"){$("editores").replaceChildren(editor({cidade:"São Paulo",estado:"SP"}));$("salvar").hidden=false;}
   else{$("editores").replaceChildren();$("salvar").hidden=true;
-    if(!cfg().key)$("avisoPrint").textContent="Pra ler prints, adicione a chave da Anthropic nas configurações. Enquanto isso, use Escrever.";}
+    if(a==="print"&&!cfg().key)$("avisoPrint").textContent="O modo automático precisa de uma chave paga da API da Anthropic. Sem ela, use Via Claude, que é grátis.";}
 }
 $("abas").addEventListener("click",e=>{const b=e.target.closest("[data-aba]");if(b)aba(b.dataset.aba);});
 $("btnAdd").onclick=()=>abrirAdd();
@@ -503,6 +519,29 @@ $("lerPrints").onclick=async()=>{
     $("salvar").hidden=false;
   }catch(err){av.className="aviso erro";av.textContent="Não foi possível ler: "+err.message;}
   finally{b.disabled=false;b.textContent="Ler prints";}
+};
+
+/* ---------- Via Claude (grátis) ---------- */
+$("copiarPedido").onclick=async()=>{
+  const txt=PROMPT+"\n\nResponda com o array JSON dentro de um bloco de código, pra eu copiar.";
+  try{await navigator.clipboard.writeText(txt);toast("Pedido copiado. Cole no Claude junto com os prints.");}
+  catch{$("textoColado").value=txt;$("textoColado").select();toast("Copie o texto do campo abaixo");}
+};
+$("arquivosColar").addEventListener("change",async e=>{
+  const fs=[...e.target.files].slice(0,10); imagens=await Promise.all(fs.map(reduzir));
+  $("previasColar").innerHTML=imagens.map(i=>`<img src="${i.url}" alt="">`).join("");
+});
+$("lerColado").onclick=()=>{
+  const txt=$("textoColado").value, av=$("avisoColar"); av.className="aviso";
+  try{
+    const ini=txt.indexOf("["), fim=txt.lastIndexOf("]");
+    if(ini<0||fim<ini) throw 0;
+    const achados=JSON.parse(txt.slice(ini,fim+1)).filter(x=>x&&x.nome);
+    if(!achados.length) throw 0;
+    av.textContent=achados.length===1?"1 lugar. Confira e salve.":`${achados.length} lugares. Confira e salve.`;
+    $("editores").replaceChildren(...achados.map(x=>{const d=editor(x,imagens[x.print]?.url||"");d.dataset.print=x.print??"";return d;}));
+    $("salvar").hidden=false; $("editores").scrollIntoView({behavior:"smooth"});
+  }catch{ av.className="aviso erro"; av.textContent="Não reconheci a resposta. Cole o bloco inteiro que o Claude mandou, começando em [ e terminando em ]."; }
 };
 
 async function geocodificar(o){
