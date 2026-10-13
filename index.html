@@ -3,218 +3,559 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Onde a gente vai?</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍻</text></svg>">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Rolê">
+<title>Rolê</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23222'/><circle cx='16' cy='14' r='5' fill='none' stroke='white' stroke-width='2.5'/><path d='M16 19v6' stroke='white' stroke-width='2.5' stroke-linecap='round'/></svg>">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
 :root{
-  --placa:#1F4396; --placa-ink:#FFFFFF; --papel:#EEF1F4; --tinta:#161A22;
-  --sinal:#F2C230; --cinza:#5D6573; --linha:#CBD2DB; --fundo-item:#FFFFFF;
-  box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#FFFFFF; --surface:#F7F7F7; --ink:#222222; --soft:#717171; --line:#EBEBEB;
+  --accent:#E31C5F; --ok:#008A05; --bar:rgba(255,255,255,.86);
+  --r:14px; color-scheme:light; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
 }
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --placa:#2C56B8; --papel:#12151B; --tinta:#E9ECF1; --cinza:#98A1AF;
-    --linha:#2A303A; --fundo-item:#1A1E26;
-  }
-}
-:root[data-theme="dark"]{
-  --placa:#2C56B8; --papel:#12151B; --tinta:#E9ECF1; --cinza:#98A1AF;
-  --linha:#2A303A; --fundo-item:#1A1E26;
-}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000;--surface:#1C1C1E;--ink:#F5F5F7;--soft:#98989F;--line:#2C2C2E;--accent:#FF4F7B;--ok:#30D158;--bar:rgba(18,18,18,.86);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#000;--surface:#1C1C1E;--ink:#F5F5F7;--soft:#98989F;--line:#2C2C2E;--accent:#FF4F7B;--ok:#30D158;--bar:rgba(18,18,18,.86);color-scheme:dark}
 *,*::before,*::after{box-sizing:inherit}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--papel);color:var(--tinta);
-  font-family:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
-  font-variation-settings:"wdth" 100;line-height:1.5;-webkit-font-smoothing:antialiased}
-.wrap{max-width:760px;margin:0 auto;padding:20px 18px 64px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.4;font-size:16px}
+button,input,select,textarea{font:inherit;color:inherit}
+svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.app{max-width:640px;margin:0 auto;padding:0 20px calc(100px + env(safe-area-inset-bottom,0px))}
+.tela{display:none}.tela.ativa{display:block}
 
-/* Placa de rua — o elemento marcante */
-.placa{background:var(--placa);color:var(--placa-ink);border-radius:10px;
-  padding:18px 20px 16px;border:3px solid var(--placa);
-  box-shadow:inset 0 0 0 2px rgba(255,255,255,.9);margin:8px 0 22px}
-.placa small{display:block;font-size:.95rem;opacity:.85;font-variation-settings:"wdth" 100}
-.placa h1{margin:2px 0 0;font-size:clamp(2.2rem,9vw,3.6rem);line-height:.95;
-  font-weight:800;font-variation-settings:"wdth" 68;letter-spacing:-.01em}
-.placa p{margin:10px 0 0;font-size:.95rem;opacity:.9}
+/* topo */
+.topo{display:flex;justify-content:space-between;align-items:flex-start;padding:18px 0 4px;gap:12px}
+.topo h1{margin:0;font-size:32px;line-height:1.1;font-weight:700;letter-spacing:-.022em}
+.topo p{margin:4px 0 0;color:var(--soft);font-size:15px}
+.circ{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--bg);display:grid;place-items:center;cursor:pointer;flex:none}
+.circ svg.i{width:18px;height:18px}
 
-.sorteio{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
-  background:var(--sinal);color:#161A22;border:0;border-radius:999px;
-  padding:14px 18px;font:inherit;font-weight:700;font-size:1.05rem;cursor:pointer}
-.sorteio:active{transform:scale(.98)}
+/* barra de vibes (estilo categorias) */
+.vibes{display:flex;gap:26px;overflow-x:auto;scrollbar-width:none;margin:14px -20px 0;padding:0 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5}
+.vibes::-webkit-scrollbar{display:none}
+.vibe{border:0;background:none;padding:12px 0 10px;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--soft);font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s}
+.vibe svg.i{width:24px;height:24px}
+.vibe[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--ink)}
 
-.busca{width:100%;margin:18px 0 6px;padding:12px 14px;font:inherit;
-  border:1.5px solid var(--linha);border-radius:10px;background:var(--fundo-item);color:var(--tinta)}
-.filtros{margin-top:10px}
-.grupo{display:flex;gap:8px;overflow-x:auto;padding:6px 0;scrollbar-width:none}
-.grupo::-webkit-scrollbar{display:none}
-.grupo span{flex:none;color:var(--cinza);font-size:.85rem;align-self:center;min-width:64px}
-.chip{flex:none;border:1.5px solid var(--linha);background:transparent;color:var(--tinta);
-  border-radius:999px;padding:6px 12px;font:inherit;font-size:.9rem;cursor:pointer;white-space:nowrap}
-.chip[aria-pressed="true"]{background:var(--placa);border-color:var(--placa);color:#fff}
+.linha-acao{display:flex;justify-content:space-between;align-items:center;margin:18px 0 14px}
+.linha-acao span{color:var(--soft);font-size:14px}
+.pill{border:1px solid var(--ink);background:var(--bg);border-radius:999px;padding:8px 16px;font-weight:600;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.pill svg.i{width:16px;height:16px}
 
-.contagem{color:var(--cinza);font-size:.9rem;margin:18px 0 6px}
-.lista{list-style:none;margin:0;padding:0}
-.lugar{border-top:1.5px solid var(--linha)}
-.lugar:last-child{border-bottom:1.5px solid var(--linha)}
-.lugar details>summary{list-style:none;cursor:pointer;padding:14px 2px;display:grid;
-  grid-template-columns:1fr auto;gap:2px 12px;align-items:baseline}
-.lugar summary::-webkit-details-marker{display:none}
-.nome{font-size:1.35rem;font-weight:700;font-variation-settings:"wdth" 80;line-height:1.15}
-.bairro{justify-self:end;background:var(--placa);color:#fff;font-size:.78rem;font-weight:600;
-  padding:2px 8px;border-radius:4px;white-space:nowrap;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7)}
-.resumo{grid-column:1/-1;color:var(--cinza);font-size:.92rem}
-.foi{color:var(--cinza)}
-.foi .nome{text-decoration:line-through;text-decoration-thickness:1.5px}
-.corpo{padding:0 2px 18px;display:grid;gap:10px}
-.corpo dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:.95rem}
-.corpo dt{color:var(--cinza)}
-.corpo dd{margin:0}
-.nota{margin:0;padding-left:12px;border-left:3px solid var(--sinal)}
-.links{display:flex;gap:8px;flex-wrap:wrap}
-.links a{color:var(--tinta);border:1.5px solid var(--linha);border-radius:8px;
-  padding:7px 12px;text-decoration:none;font-weight:600;font-size:.9rem}
-.destaque{animation:pisca 1.6s ease-out}
-@keyframes pisca{0%{background:var(--sinal)}100%{background:transparent}}
-.vazio{padding:28px 4px;color:var(--cinza)}
-button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible{outline:3px solid var(--sinal);outline-offset:2px}
-@media (prefers-reduced-motion:reduce){.destaque{animation:none;outline:3px solid var(--sinal)}}
+/* feed */
+.feed{display:grid;gap:28px}
+.anuncio{border:0;background:none;padding:0;text-align:left;cursor:pointer;display:block;width:100%}
+.foto{position:relative;aspect-ratio:4/3;border-radius:var(--r);overflow:hidden;background:var(--surface);display:grid;place-items:center}
+.foto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top}
+.foto .ini{font-size:44px;font-weight:700;color:var(--line);letter-spacing:-.03em}
+.selo{position:absolute;left:12px;top:12px;background:var(--bg);color:var(--ink);font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.anuncio .t{display:flex;justify-content:space-between;gap:10px;margin-top:10px}
+.anuncio .nome{font-weight:600;font-size:16px}
+.anuncio .preco{color:var(--ink);font-size:15px;white-space:nowrap}
+.anuncio .sub{color:var(--soft);font-size:15px}
+.feed.anim .anuncio{animation:fade .35s ease both;animation-delay:calc(var(--i)*40ms)}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* buscar */
+.busca{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:999px;padding:12px 18px;margin:16px 0 12px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.busca input{border:0;outline:0;background:transparent;flex:1;min-width:0}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 0 8px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:7px 14px;font-size:14px;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--bg)}
+.grade{display:grid;grid-template-columns:1fr 1fr;gap:20px 14px;margin-top:8px}
+.grade .foto{aspect-ratio:1/1}
+.grade .anuncio .nome{font-size:15px}
+.grade .anuncio .sub{font-size:14px}
+.conta{color:var(--soft);font-size:14px;margin:8px 0 4px}
+.vazio{padding:48px 20px;text-align:center;color:var(--soft)}
+.vazio strong{display:block;color:var(--ink);font-size:18px;margin-bottom:6px}
+
+/* mapa */
+#mapa{height:calc(100vh - 230px);min-height:360px;border-radius:var(--r);overflow:hidden;margin-top:8px;z-index:0}
+.pino{width:16px;height:16px;border-radius:50%;background:var(--ink);border:3px solid var(--bg);box-shadow:0 1px 6px rgba(0,0,0,.35)}
+.leaflet-popup-content-wrapper{border-radius:12px}
+.leaflet-popup-content{font:inherit;margin:12px 14px;font-size:14px}
+.leaflet-popup-content button{margin-top:8px;border:0;background:#222;color:#fff;border-radius:8px;padding:6px 12px;font-weight:600;cursor:pointer}
+
+/* tab bar */
+.tabbar{position:fixed;left:0;right:0;bottom:0;background:var(--bar);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-top:1px solid var(--line);display:flex;justify-content:center;z-index:10;padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px))}
+.tabbar div{display:flex;width:100%;max-width:640px;justify-content:space-around}
+.tabbar button{border:0;background:none;color:var(--soft);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;padding:4px 14px;cursor:pointer}
+.tabbar button[aria-current="true"]{color:var(--accent)}
+
+/* sheets */
+dialog{border:0;padding:0;width:100%;max-width:640px;max-height:94vh;margin:auto auto 0;border-radius:16px 16px 0 0;background:var(--bg);color:var(--ink)}
+dialog[open]{animation:sobe .28s cubic-bezier(.2,.8,.2,1)}
+@keyframes sobe{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+.sheet{padding:0 20px calc(28px + env(safe-area-inset-bottom,0px))}
+.sheet-topo{position:sticky;top:0;background:var(--bg);display:flex;justify-content:space-between;align-items:center;padding:14px 0;z-index:2;border-bottom:1px solid var(--line);margin:0 -20px 16px;padding-left:20px;padding-right:20px}
+.sheet-topo h2{margin:0;font-size:17px;font-weight:600}
+.link{border:0;background:none;color:var(--ink);font-weight:600;cursor:pointer;padding:4px;text-decoration:underline}
+.det-foto{margin:0 -20px;aspect-ratio:4/3;background:var(--surface);position:relative;display:grid;place-items:center;overflow:hidden}
+.det-foto img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+.det-foto .ini{font-size:72px;font-weight:700;color:var(--line)}
+.det-foto .circ{position:absolute;left:16px;top:16px;z-index:2;border:0;box-shadow:0 1px 6px rgba(0,0,0,.2)}
+.det h2{font-size:26px;line-height:1.15;letter-spacing:-.02em;margin:20px 0 4px;font-weight:700}
+.det .sub{color:var(--soft);margin:0 0 4px}
+.lista{margin:18px 0;border-top:1px solid var(--line)}
+.lista div{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+.lista div svg.i{color:var(--soft);margin-top:1px}
+.lista span{overflow-wrap:anywhere}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tags span{border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:13px;color:var(--soft)}
+.nota{background:var(--surface);border-radius:12px;padding:14px 16px;margin:0 0 18px;font-size:15px}
+.btn{display:flex;width:100%;justify-content:center;align-items:center;gap:8px;border:0;border-radius:10px;padding:14px;font-weight:600;font-size:16px;cursor:pointer;text-decoration:none}
+.btn-pri{background:var(--accent);color:#fff}
+.btn-dark{background:var(--ink);color:var(--bg)}
+.btn-sec{background:var(--bg);color:var(--ink);border:1px solid var(--ink)}
+.btn:disabled{opacity:.5}
+.stack{display:grid;gap:10px}
+.grupo{border-top:1px solid var(--line);margin-top:20px}
+.grupo button{display:flex;width:100%;align-items:center;gap:14px;border:0;border-bottom:1px solid var(--line);background:none;padding:15px 0;cursor:pointer;text-align:left}
+.grupo .perigo{color:#D93025}
+
+/* formulário */
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border-radius:9px;padding:2px;margin-bottom:16px}
+.seg button{border:0;background:none;border-radius:7px;padding:7px;font-size:14px;font-weight:600;cursor:pointer;color:var(--soft)}
+.seg button[aria-pressed="true"]{background:var(--bg);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.drop{display:flex;flex-direction:column;align-items:center;gap:6px;border:1px dashed var(--soft);border-radius:var(--r);padding:30px 20px;text-align:center;cursor:pointer}
+.drop input{display:none}
+.drop strong{font-size:16px}
+.drop span{color:var(--soft);font-size:14px}
+.previas{display:flex;gap:8px;overflow-x:auto;margin-top:12px}
+.previas img{height:96px;border-radius:10px}
+.aviso{color:var(--soft);font-size:14px;margin:12px 0}
+.aviso.erro{color:#D93025}
+.ed{border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.ed-topo{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.ed-topo img{width:52px;height:52px;border-radius:10px;object-fit:cover;object-position:top}
+.ed-topo label{flex:1;display:flex;justify-content:space-between;align-items:center;font-weight:600}
+.campos{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.campos label{display:grid;gap:5px;font-size:13px;color:var(--soft);font-weight:500}
+.campos .larga{grid-column:1/-1}
+.campos input,.campos select,.campos textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:16px}
+.campos input:focus,.campos select:focus,.campos textarea:focus{outline:0;border-color:var(--ink)}
+.campos textarea{min-height:64px;resize:vertical}
+.toggle{appearance:none;width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;cursor:pointer;transition:background .2s}
+.toggle::after{content:"";position:absolute;left:2px;top:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.toggle:checked{background:var(--ok)}.toggle:checked::after{transform:translateX(18px)}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translate(-50%,10px);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:10px;font-weight:600;font-size:14px;z-index:50;opacity:0;transition:.2s;pointer-events:none;max-width:90%;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (min-width:600px){.feed{grid-template-columns:1fr 1fr;gap:28px 18px}.feed .foto{aspect-ratio:1/1}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="placa">
-    <small>Caderninho do Gui</small>
-    <h1>Onde a gente vai?</h1>
-    <p id="total">Carregando lugares…</p>
-  </header>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-tudo" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></symbol>
+  <symbol id="i-date" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10Z"/></symbol>
+  <symbol id="i-amigos" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.2"/><path d="M3 19.5c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><circle cx="16.5" cy="9.5" r="2.6"/><path d="M16 14.6c2.6.1 4.4 1.6 5 4.4"/></symbol>
+  <symbol id="i-visita" viewBox="0 0 24 24"><rect x="5" y="7.5" width="14" height="12" rx="2"/><path d="M9 7.5V5.5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 5.5v2M9 11v5M15 11v5"/></symbol>
+  <symbol id="i-sozinho" viewBox="0 0 24 24"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5V9Z"/><path d="M16 10.5h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5c0 1.2 1 1.3 1 2.5M11.5 3.5c0 1.2 1 1.3 1 2.5"/></symbol>
+  <symbol id="i-familia" viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5"/><path d="M6 10v9.5h12V10"/><path d="M10 19.5v-5h4v5"/></symbol>
+  <symbol id="i-trabalho" viewBox="0 0 24 24"><path d="M7 4h10l-1.2 6.2a3.8 3.8 0 0 1-7.6 0L7 4Z"/><path d="M12 14v6M8.5 20h7M7.6 7.5h8.8"/></symbol>
+  <symbol id="i-explorar" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2Z"/></symbol>
+  <symbol id="i-busca" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></symbol>
+  <symbol id="i-mapa" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.4"/></symbol>
+  <symbol id="i-mais" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/></symbol>
+  <symbol id="i-ajustes" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
+  <symbol id="i-dado" viewBox="0 0 24 24"><path d="M4 7.5h3.5c4.5 0 5.5 9 10 9H20M4 16.5h3.5c1.6 0 2.7-1.2 3.6-2.6M13 10c.9-1.3 2.1-2.5 4.5-2.5H20"/><path d="m18 5 2 2.5-2 2.5M18 14l2 2.5-2 2.5"/></symbol>
+  <symbol id="i-relogio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-pino" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.4"/></symbol>
+  <symbol id="i-preco" viewBox="0 0 24 24"><path d="M15.5 8.5c-.6-1.2-1.9-2-3.5-2-2 0-3.5 1-3.5 2.6 0 3.6 7 1.8 7 5.4 0 1.6-1.5 2.9-3.5 2.9-1.7 0-3.1-.8-3.7-2.1M12 4.5v2M12 17.4v2"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M4 12.2V5a1 1 0 0 1 1-1h7.2l7.3 7.3a1.5 1.5 0 0 1 0 2.1l-6.1 6.1a1.5 1.5 0 0 1-2.1 0L4 12.2Z"/><circle cx="8.5" cy="8.5" r="1.3"/></symbol>
+  <symbol id="i-voltar" viewBox="0 0 24 24"><path d="m14.5 5-7 7 7 7"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12.2 2.4 2.4 4.8-5"/></symbol>
+  <symbol id="i-editar" viewBox="0 0 24 24"><path d="M4.5 19.5 5.3 16 15.8 5.5a1.8 1.8 0 0 1 2.6 0l.1.1a1.8 1.8 0 0 1 0 2.6L8 18.7l-3.5.8Z"/></symbol>
+  <symbol id="i-lixo" viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 12.5h8L17 7"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.5-2h6l1.5 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5v-9Z"/><circle cx="12" cy="13" r="3.3"/></symbol>
+</svg>
 
-  <button class="sorteio" id="sortear">🎲 Escolhe um pra mim</button>
+<div class="app">
+  <!-- EXPLORAR -->
+  <section class="tela ativa" id="t-explorar">
+    <div class="topo">
+      <div><h1>Qual é a sua vibe hoje?</h1><p id="resumo">Carregando…</p></div>
+      <button class="circ" id="btnConfig" aria-label="Configurações"><svg class="i"><use href="#i-ajustes"/></svg></button>
+    </div>
+    <nav class="vibes" id="vibes" aria-label="Vibes"></nav>
+    <div class="linha-acao"><span id="contaVibe"></span>
+      <button class="pill" id="surpresa"><svg class="i"><use href="#i-dado"/></svg>Escolhe por mim</button></div>
+    <div class="feed" id="feed"></div>
+  </section>
 
-  <input class="busca" id="busca" type="search" placeholder="Buscar por nome, bairro, comida…" aria-label="Buscar">
+  <!-- BUSCAR -->
+  <section class="tela" id="t-buscar">
+    <div class="topo"><div><h1>Acervo</h1></div></div>
+    <label class="busca"><svg class="i"><use href="#i-busca"/></svg><input id="busca" type="search" placeholder="Nome, bairro, comida" aria-label="Buscar"></label>
+    <div class="chips" id="fTipo"></div>
+    <div class="chips" id="fCidade"></div>
+    <div class="chips" id="fStatus"></div>
+    <p class="conta" id="conta"></p>
+    <div class="grade" id="grade"></div>
+  </section>
 
-  <div class="filtros" id="filtros"></div>
-
-  <p class="contagem" id="contagem"></p>
-  <ul class="lista" id="lista"></ul>
+  <!-- MAPA -->
+  <section class="tela" id="t-mapa">
+    <div class="topo"><div><h1>Mapa</h1></div></div>
+    <div class="chips" id="fMapa"></div>
+    <div id="mapa"></div>
+  </section>
 </div>
 
+<nav class="tabbar" aria-label="Navegação"><div>
+  <button data-tela="explorar" aria-current="true"><svg class="i"><use href="#i-explorar"/></svg>Explorar</button>
+  <button data-tela="buscar"><svg class="i"><use href="#i-busca"/></svg>Acervo</button>
+  <button data-tela="mapa"><svg class="i"><use href="#i-mapa"/></svg>Mapa</button>
+  <button id="btnAdd"><svg class="i"><use href="#i-mais"/></svg>Adicionar</button>
+</div></nav>
+
+<dialog id="dDetalhe"><div class="sheet det" id="detalhe"></div></dialog>
+
+<dialog id="dAdd"><div class="sheet">
+  <div class="sheet-topo"><button class="link" data-fechar>Cancelar</button><h2 id="addTitulo">Novo lugar</h2><span style="width:64px"></span></div>
+  <div class="seg" id="abas"><button data-aba="print" aria-pressed="true">Por print</button><button data-aba="manual" aria-pressed="false">Escrever</button></div>
+  <div id="painelPrint">
+    <label class="drop"><input type="file" id="arquivos" accept="image/*" multiple>
+      <svg class="i" style="width:30px;height:30px"><use href="#i-camera"/></svg>
+      <strong>Escolher prints</strong><span>Até 10 de uma vez. Nome, endereço, horários e vibe são preenchidos sozinhos.</span></label>
+    <div class="previas" id="previas"></div>
+    <p class="aviso" id="avisoPrint"></p>
+    <button class="btn btn-dark" id="lerPrints" hidden>Ler prints</button>
+  </div>
+  <div id="editores"></div>
+  <button class="btn btn-pri" id="salvar" hidden>Salvar</button>
+</div></dialog>
+
+<dialog id="dConfig"><div class="sheet">
+  <div class="sheet-topo"><button class="link" data-fechar>Fechar</button><h2>Configurações</h2><span style="width:52px"></span></div>
+  <p class="aviso" style="margin-top:0">Fica salvo só neste aparelho. Só é preciso pra adicionar e editar; pra ver a lista, não.</p>
+  <div class="campos">
+    <label>Usuário do GitHub<input id="cOwner" autocapitalize="off" autocorrect="off"></label>
+    <label>Repositório<input id="cRepo" autocapitalize="off" autocorrect="off"></label>
+    <label class="larga">Token do GitHub<input id="cToken" type="password" autocomplete="off"></label>
+    <label class="larga">Chave da API da Anthropic (pra ler prints)<input id="cKey" type="password" autocomplete="off" placeholder="sk-ant-…"></label>
+  </div>
+  <p class="aviso" id="avisoConfig"></p>
+  <button class="btn btn-dark" id="salvarConfig">Salvar e testar</button>
+</div></dialog>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
-const ROTULOS = {
-  ocasioes:{date:"💘 Date",amigos:"🍻 Com amigos",visita:"🧳 Receber visita",sozinho:"🎧 Sozinho",familia:"👨‍👩‍👧 Família",trabalho:"💼 Happy hour"},
-  tipo:{bar:"Bar",restaurante:"Restaurante",cafe:"Café",balada:"Balada",cultura:"Cultura",ar_livre:"Ar livre",doce:"Doces"},
-  status:{"quero-ir":"Quero ir","ja-fui":"Já fui"}
-};
-const estado = {busca:"", ocasioes:null, tipo:null, cidade:null, status:"quero-ir"};
-let LUGARES = [];
+const VIBES={date:"Date",amigos:"Com amigos",visita:"Receber visita",sozinho:"Sozinho",familia:"Família",trabalho:"Happy hour"};
+const TIPOS={bar:"Bar",restaurante:"Restaurante",cafe:"Café",balada:"Balada",cultura:"Cultura",ar_livre:"Ar livre",doce:"Doceria"};
+const MODELO="claude-sonnet-5-5";
 
-const rotulo = (grupo, v) => (ROTULOS[grupo] && ROTULOS[grupo][v]) || v;
-const norm = s => (s||"").toString().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+const $=id=>document.getElementById(id);
+const ic=n=>`<svg class="i"><use href="#i-${n}"/></svg>`;
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+const embaralha=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
+const iniciais=n=>String(n||"?").split(/\s+/).filter(w=>w.length>2||/^[A-Z]/.test(w)).slice(0,2).map(w=>w[0]).join("").toUpperCase()||"?";
+function toast(m,ms=2600){const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("on"),ms);}
 
-function filtrados(){
-  const q = norm(estado.busca);
-  return LUGARES.filter(l =>
-    (!estado.ocasioes || (l.ocasioes||[]).includes(estado.ocasioes)) &&
-    (!estado.tipo || l.tipo === estado.tipo) &&
-    (!estado.cidade || l.cidade === estado.cidade) &&
-    (!estado.status || (l.status||"quero-ir") === estado.status) &&
-    (!q || norm([l.nome,l.bairro,l.cidade,l.notas,(l.tags||[]).join(" ")].join(" ")).includes(q))
-  );
+/* ---------- Config + GitHub ---------- */
+const store={get(k){try{return localStorage.getItem("role."+k)||""}catch{return""}},set(k,v){try{localStorage.setItem("role."+k,v)}catch{}}};
+function cfg(){
+  const u=location.hostname.split(".")[0], r=location.pathname.split("/").filter(Boolean)[0]||"";
+  return {owner:store.get("owner")||(location.hostname.endsWith("github.io")?u:""),repo:store.get("repo")||r,token:store.get("token"),key:store.get("key"),branch:"main"};
+}
+const podeEditar=()=>{const c=cfg();return !!(c.owner&&c.repo&&c.token);};
+const b64=s=>{let o="";new TextEncoder().encode(s).forEach(b=>o+=String.fromCharCode(b));return btoa(o);};
+const unb64=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g,"")),c=>c.charCodeAt(0)));
+async function gh(path,opts={}){
+  const c=cfg();
+  const r=await fetch(`https://api.github.com/repos/${c.owner}/${c.repo}/contents/${path}`,{...opts,headers:{Authorization:`Bearer ${c.token}`,Accept:"application/vnd.github+json"}});
+  if(r.status===404&&!opts.method) return null;
+  if(!r.ok) throw new Error(`GitHub respondeu ${r.status}`);
+  return r.json();
+}
+async function lerRemoto(){const f=await gh("lugares.json?ref="+cfg().branch+"&t="+Date.now());return f?{dados:JSON.parse(unb64(f.content)||"[]"),sha:f.sha}:{dados:[],sha:undefined};}
+async function commitLugares(mudar,msg){
+  const {dados,sha}=await lerRemoto(); const novo=mudar(dados);
+  await gh("lugares.json",{method:"PUT",body:JSON.stringify({message:msg,content:b64(JSON.stringify(novo,null,2)+"\n"),sha,branch:cfg().branch})});
+  LUGARES=novo; renderTudo();
+}
+async function subirImagem(base64,nome){await gh("prints/"+nome,{method:"PUT",body:JSON.stringify({message:"print: "+nome,content:base64,branch:cfg().branch})});return "prints/"+nome;}
+
+/* ---------- Estado ---------- */
+let LUGARES=[]; const fotosLocais={};
+const fotoSrc=l=>l.foto?(fotosLocais[l.foto]||l.foto):"";
+const f={vibe:null,busca:"",tipo:null,cidade:null,status:"quero-ir",mapa:null};
+const fila=()=>LUGARES.filter(l=>(l.status||"quero-ir")==="quero-ir");
+
+async function carregar(){
+  try{ LUGARES=podeEditar()?(await lerRemoto()).dados:await (await fetch("lugares.json?t="+Date.now())).json(); }
+  catch{ try{LUGARES=await (await fetch("lugares.json?t="+Date.now())).json();}catch{LUGARES=[];toast("Não foi possível ler lugares.json");} }
+  renderTudo(true);
 }
 
-function grupoChips(titulo, chave, valores){
-  const div = document.createElement("div");
-  div.className = "grupo";
-  div.innerHTML = `<span>${titulo}</span>`;
-  const todos = [null, ...valores];
-  todos.forEach(v=>{
-    const b = document.createElement("button");
-    b.className = "chip";
-    b.textContent = v === null ? "Tudo" : rotulo(chave, v);
-    b.setAttribute("aria-pressed", estado[chave] === v);
-    b.onclick = ()=>{ estado[chave] = v; desenhar(); };
-    div.appendChild(b);
+/* ---------- Render ---------- */
+function renderTudo(anim){renderExplorar(anim);renderBuscar();if(mapa)renderMapa();}
+function foto(l){const s=fotoSrc(l);return `<div class="foto">${s?`<img src="${esc(s)}" alt="" loading="lazy" onerror="this.remove()">`:""}<span class="ini">${esc(iniciais(l.nome))}</span>${l.status==="ja-fui"?'<span class="selo">Já fui</span>':""}</div>`;}
+function anuncio(l,i=0){
+  const sub=[TIPOS[l.tipo]||l.tipo,l.bairro||l.cidade].filter(Boolean).join(" · ");
+  return `<button class="anuncio" style="--i:${i}" data-abrir="${esc(l.id)}">${foto(l)}
+    <div class="t"><span class="nome">${esc(l.nome)}</span>${l.preco?`<span class="preco">${esc(l.preco)}</span>`:""}</div>
+    <div class="sub">${esc(sub)}</div>${l.horarios?`<div class="sub">${esc(l.horarios)}</div>`:""}</button>`;
+}
+
+function renderExplorar(anim){
+  const fl=fila();
+  $("resumo").textContent=LUGARES.length?`${fl.length} lugares na fila`:"Seu acervo de rolês";
+  $("vibes").innerHTML=[["tudo","Tudo",null],...Object.entries(VIBES).map(([k,v])=>[k,v,k])]
+    .map(([icn,t,k])=>`<button class="vibe" data-vibe="${k??""}" aria-pressed="${f.vibe===k}">${ic(icn)}${t}</button>`).join("");
+  const lista=fl.filter(l=>!f.vibe||(l.ocasioes||[]).includes(f.vibe)).sort((a,b)=>(b.criadoEm||0)-(a.criadoEm||0));
+  $("contaVibe").textContent=lista.length===1?"1 lugar":`${lista.length} lugares`;
+  $("surpresa").hidden=!lista.length;
+  const feed=$("feed"); feed.classList.toggle("anim",!!anim);
+  feed.innerHTML=lista.length?lista.map(anuncio).join(""):
+    `<div class="vazio"><strong>${LUGARES.length?"Nada com essa vibe ainda":"Nenhum lugar ainda"}</strong>${LUGARES.length?"Marque essa vibe ao adicionar ou editar um lugar.":"Toque em Adicionar e mande o primeiro print."}</div>`;
+}
+$("vibes").addEventListener("click",e=>{const b=e.target.closest("[data-vibe]");if(!b)return;f.vibe=b.dataset.vibe||null;renderExplorar(true);});
+$("surpresa").onclick=()=>{const l=fila().filter(x=>!f.vibe||(x.ocasioes||[]).includes(f.vibe));if(l.length)abrirDetalhe(embaralha(l)[0].id,true);};
+
+function chips(el,k,vals,rot){el.innerHTML=[null,...vals].map(v=>`<button class="chip" data-k="${k}" data-v="${v??""}" aria-pressed="${f[k]===v}">${v===null?"Tudo":esc(rot?rot(v):v)}</button>`).join("");}
+function renderBuscar(){
+  const uniq=a=>[...new Set(a.filter(Boolean))].sort((x,y)=>x.localeCompare(y,"pt"));
+  chips($("fTipo"),"tipo",uniq(LUGARES.map(l=>l.tipo)),v=>TIPOS[v]||v);
+  chips($("fCidade"),"cidade",uniq(LUGARES.map(l=>l.cidade)));
+  chips($("fStatus"),"status",["quero-ir","ja-fui"],v=>v==="ja-fui"?"Já fui":"Quero ir");
+  const q=norm(f.busca);
+  const lista=LUGARES.filter(l=>(!f.tipo||l.tipo===f.tipo)&&(!f.cidade||l.cidade===f.cidade)&&(!f.status||(l.status||"quero-ir")===f.status)
+    &&(!q||norm([l.nome,l.bairro,l.cidade,l.notas,(l.tags||[]).join(" ")].join(" ")).includes(q)));
+  $("conta").textContent=lista.length===1?"1 lugar":`${lista.length} lugares`;
+  $("grade").innerHTML=lista.length?lista.map(l=>anuncio(l)).join(""):`<div class="vazio" style="grid-column:1/-1"><strong>Nenhum resultado</strong>Tente outro filtro ou palavra.</div>`;
+}
+$("t-buscar").addEventListener("click",e=>{const c=e.target.closest(".chip[data-k]");if(!c)return;f[c.dataset.k]=c.dataset.v||null;renderBuscar();});
+$("busca").addEventListener("input",e=>{f.busca=e.target.value;renderBuscar();});
+
+/* ---------- Mapa ---------- */
+let mapa=null,camada=null;
+function renderMapa(){
+  chips($("fMapa"),"mapa",Object.keys(VIBES),v=>VIBES[v]);
+  camada.clearLayers(); const pts=[];
+  LUGARES.filter(l=>l.lat&&l.lng&&(!f.mapa||(l.ocasioes||[]).includes(f.mapa))).forEach(l=>{
+    L.marker([l.lat,l.lng],{icon:L.divIcon({className:"",html:'<div class="pino"></div>',iconSize:[16,16],iconAnchor:[8,8]})})
+      .addTo(camada).bindPopup(`<strong>${esc(l.nome)}</strong><br><span style="color:#717171">${esc(l.bairro||l.cidade||"")}</span><br><button data-abrir="${esc(l.id)}">Ver detalhes</button>`);
+    pts.push([l.lat,l.lng]);
   });
-  return div;
+  if(pts.length) mapa.fitBounds(pts,{padding:[40,40],maxZoom:15});
+}
+$("fMapa").addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c)return;f.mapa=c.dataset.v||null;renderMapa();});
+function iniciarMapa(){
+  if(mapa){setTimeout(()=>mapa.invalidateSize(),50);return;}
+  if(!window.L){$("mapa").innerHTML='<div class="vazio">O mapa não carregou. Confira a conexão.</div>';return;}
+  const escuro=matchMedia("(prefers-color-scheme: dark)").matches;
+  mapa=L.map("mapa",{zoomControl:false}).setView([-23.5614,-46.6559],12);
+  L.tileLayer(`https://{s}.basemaps.cartocdn.com/${escuro?"dark_all":"light_all"}/{z}/{x}/{y}{r}.png`,{attribution:"&copy; OpenStreetMap &copy; CARTO",maxZoom:19}).addTo(mapa);
+  camada=L.layerGroup().addTo(mapa); renderMapa();
 }
 
-function desenharFiltros(){
-  const uniq = arr => [...new Set(arr.filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt"));
-  const f = document.getElementById("filtros");
-  f.innerHTML = "";
-  f.append(
-    grupoChips("Pra quê", "ocasioes", uniq(LUGARES.flatMap(l=>l.ocasioes||[]))),
-    grupoChips("O quê", "tipo", uniq(LUGARES.map(l=>l.tipo))),
-    grupoChips("Onde", "cidade", uniq(LUGARES.map(l=>l.cidade))),
-    grupoChips("Status", "status", ["quero-ir","ja-fui"])
-  );
+/* ---------- Navegação ---------- */
+document.querySelector(".tabbar").addEventListener("click",e=>{
+  const b=e.target.closest("[data-tela]");if(!b)return;
+  document.querySelectorAll(".tabbar [data-tela]").forEach(x=>x.setAttribute("aria-current",x===b));
+  document.querySelectorAll(".tela").forEach(t=>t.classList.toggle("ativa",t.id==="t-"+b.dataset.tela));
+  if(b.dataset.tela==="mapa")iniciarMapa(); window.scrollTo({top:0});
+});
+document.addEventListener("click",e=>{
+  const a=e.target.closest("[data-abrir]");if(a){abrirDetalhe(a.dataset.abrir);return;}
+  const x=e.target.closest("[data-fechar]");if(x)x.closest("dialog").close();
+});
+document.querySelectorAll("dialog").forEach(d=>d.addEventListener("click",e=>{if(e.target===d)d.close();}));
+
+/* ---------- Detalhe ---------- */
+const linkMaps=l=>"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent([l.nome,l.endereco||l.bairro,l.cidade].filter(Boolean).join(" "));
+const linkInsta=l=>"https://instagram.com/"+String(l.instagram||"").replace(/^@/,"");
+function abrirDetalhe(id,sorteio){
+  const l=LUGARES.find(x=>x.id===id);if(!l)return;
+  const s=fotoSrc(l);
+  const linhas=[["pino",[l.endereco,l.bairro,l.cidade].filter(Boolean).join(", ")],["relogio",l.horarios],["preco",l.preco],
+    ["tag",(l.ocasioes||[]).map(o=>VIBES[o]||o).join(", ")]].filter(([,v])=>v);
+  $("detalhe").innerHTML=`<div class="det-foto">${s?`<img src="${esc(s)}" alt="" onerror="this.remove()">`:""}<span class="ini">${esc(iniciais(l.nome))}</span>
+      <button class="circ" data-fechar aria-label="Fechar">${ic("voltar")}</button></div>
+    ${sorteio?'<p class="sub" style="margin:18px 0 -14px">Que tal hoje?</p>':""}
+    <h2>${esc(l.nome)}</h2>
+    <p class="sub">${esc([TIPOS[l.tipo]||l.tipo,l.bairro||l.cidade].filter(Boolean).join(" · "))}</p>
+    ${(l.tags||[]).length?`<div class="tags">${l.tags.map(t=>`<span>${esc(t)}</span>`).join("")}</div>`:""}
+    <div class="lista">${linhas.map(([i,v])=>`<div>${ic(i)}<span>${esc(v)}</span></div>`).join("")}</div>
+    ${l.notas?`<p class="nota">${esc(l.notas)}</p>`:""}
+    <div class="stack"><a class="btn btn-pri" href="${esc(linkMaps(l))}" target="_blank" rel="noopener">Abrir no Maps</a>
+    ${l.instagram?`<a class="btn btn-sec" href="${esc(linkInsta(l))}" target="_blank" rel="noopener">${esc(l.instagram)} no Instagram</a>`:""}
+    ${sorteio?`<button class="btn btn-sec" id="outro">Sortear outro</button>`:""}</div>
+    ${podeEditar()?`<div class="grupo">
+      <button data-acao="status">${ic("check")}${l.status==="ja-fui"?"Voltar pra lista de quero ir":"Marcar como já fui"}</button>
+      <button data-acao="editar">${ic("editar")}Editar</button>
+      <button data-acao="apagar" class="perigo">${ic("lixo")}Apagar</button></div>`:""}`;
+  if(sorteio) $("outro").onclick=()=>{ $("dDetalhe").close(); $("surpresa").click(); };
+  $("detalhe").onclick=async e=>{
+    const b=e.target.closest("[data-acao]");if(!b)return; b.disabled=true;
+    try{
+      if(b.dataset.acao==="status"){const n=l.status==="ja-fui"?"quero-ir":"ja-fui";
+        await commitLugares(d=>d.map(x=>x.id===id?{...x,status:n}:x),`${l.nome}: ${n}`);toast(n==="ja-fui"?"Marcado como já fui":"Voltou pra lista");$("dDetalhe").close();}
+      if(b.dataset.acao==="editar"){$("dDetalhe").close();abrirAdd(l);}
+      if(b.dataset.acao==="apagar"&&confirm(`Apagar “${l.nome}”?`)){await commitLugares(d=>d.filter(x=>x.id!==id),`remove ${l.nome}`);toast("Apagado");$("dDetalhe").close();}
+    }catch(err){toast("Erro: "+err.message,4000);}finally{b.disabled=false;}
+  };
+  $("dDetalhe").showModal(); $("dDetalhe").scrollTop=0;
 }
 
-function itemHTML(l){
-  const linhas = [
-    ["Endereço", l.endereco], ["Horários", l.horarios], ["Preço", l.preco],
-    ["Pra quê", (l.ocasioes||[]).map(o=>rotulo("ocasioes",o)).join(", ")]
-  ].filter(([,v])=>v);
-  const maps = l.maps || (l.endereco ? "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(l.nome+" "+l.endereco) : "");
-  const insta = l.instagram ? "https://instagram.com/"+l.instagram.replace(/^@/,"") : "";
-  const resumo = [rotulo("tipo",l.tipo), l.preco, (l.tags||[]).slice(0,3).join(", ")].filter(Boolean).join(" — ");
-  return `
-  <li class="lugar ${l.status==="ja-fui"?"foi":""}" id="l-${l.id}">
-    <details>
-      <summary>
-        <span class="nome">${l.nome}</span>
-        <span class="bairro">${l.bairro || l.cidade || ""}</span>
-        <span class="resumo">${resumo}</span>
-      </summary>
-      <div class="corpo">
-        ${linhas.length?`<dl>${linhas.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl>`:""}
-        ${l.notas?`<p class="nota">${l.notas}</p>`:""}
-        <div class="links">
-          ${maps?`<a href="${maps}" target="_blank" rel="noopener">Abrir no Maps</a>`:""}
-          ${insta?`<a href="${insta}" target="_blank" rel="noopener">${l.instagram}</a>`:""}
-          ${l.site?`<a href="${l.site}" target="_blank" rel="noopener">Site</a>`:""}
-        </div>
-      </div>
-    </details>
-  </li>`;
+/* ---------- Editor ---------- */
+function editor(l={},previa){
+  const d=document.createElement("div");d.className="ed";const sel=l.ocasioes||[];
+  d.innerHTML=`${previa!==undefined?`<div class="ed-topo">${previa?`<img src="${previa}" alt="">`:""}<label>Salvar este<input type="checkbox" class="toggle incluir" checked></label></div>`:""}
+  <div class="campos">
+    <label class="larga">Nome<input name="nome" value="${esc(l.nome)}"></label>
+    <label>Tipo<select name="tipo">${Object.entries(TIPOS).map(([k,t])=>`<option value="${k}" ${l.tipo===k?"selected":""}>${t}</option>`).join("")}</select></label>
+    <label>Preço<select name="preco">${["","$","$$","$$$","$$$$"].map(p=>`<option ${l.preco===p?"selected":""}>${p}</option>`).join("")}</select></label>
+    <label class="larga">Vibes<div class="chips" style="flex-wrap:wrap">${Object.entries(VIBES).map(([k,t])=>`<button type="button" class="chip" data-oca="${k}" aria-pressed="${sel.includes(k)}">${t}</button>`).join("")}</div></label>
+    <label>Bairro<input name="bairro" value="${esc(l.bairro)}"></label>
+    <label>Cidade<input name="cidade" value="${esc(l.cidade)}"></label>
+    <label class="larga">Endereço<input name="endereco" value="${esc(l.endereco)}"></label>
+    <label class="larga">Horários<input name="horarios" value="${esc(l.horarios)}"></label>
+    <label>Instagram<input name="instagram" value="${esc(l.instagram)}" placeholder="@" autocapitalize="off"></label>
+    <label>UF<input name="estado" value="${esc(l.estado)}" maxlength="2"></label>
+    <label class="larga">Tags, separadas por vírgula<input name="tags" value="${esc((l.tags||[]).join(", "))}"></label>
+    <label class="larga">Notas<textarea name="notas">${esc(l.notas)}</textarea></label>
+  </div>`;
+  d.querySelectorAll("[data-oca]").forEach(b=>b.onclick=e=>{e.preventDefault();b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")!=="true");});
+  return d;
 }
-
-function desenhar(){
-  desenharFiltros();
-  const lista = filtrados();
-  document.getElementById("contagem").textContent =
-    lista.length === 1 ? "1 lugar" : `${lista.length} lugares`;
-  document.getElementById("lista").innerHTML = lista.length
-    ? lista.map(itemHTML).join("")
-    : `<li class="vazio">Nada com esses filtros. Toque em "Tudo" em algum grupo pra abrir a busca.</li>`;
+function lerEditor(d){
+  const v=n=>d.querySelector(`[name=${n}]`).value.trim();
+  const o={nome:v("nome"),tipo:v("tipo"),preco:v("preco"),bairro:v("bairro"),cidade:v("cidade"),estado:v("estado").toUpperCase(),endereco:v("endereco"),
+    horarios:v("horarios"),instagram:v("instagram"),notas:v("notas"),tags:v("tags").split(",").map(t=>t.trim()).filter(Boolean),
+    ocasioes:[...d.querySelectorAll('[data-oca][aria-pressed="true"]')].map(b=>b.dataset.oca)};
+  if(o.instagram&&!o.instagram.startsWith("@"))o.instagram="@"+o.instagram;
+  for(const k in o)if(o[k]===""||(Array.isArray(o[k])&&!o[k].length&&k!=="ocasioes"))delete o[k];
+  return o;
 }
+const slug=s=>norm(s).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40)||"lugar";
 
-document.getElementById("busca").addEventListener("input", e=>{ estado.busca = e.target.value; desenhar(); });
+/* ---------- Adicionar ---------- */
+let editando=null,imagens=[];
+function abrirAdd(l=null){
+  if(!podeEditar()){toast("Configure o GitHub primeiro");abrirConfig();return;}
+  editando=l;imagens=[];
+  $("previas").innerHTML="";$("avisoPrint").textContent="";$("avisoPrint").className="aviso";$("lerPrints").hidden=true;$("arquivos").value="";
+  $("addTitulo").textContent=l?"Editar":"Novo lugar";$("abas").hidden=!!l;aba(l?"manual":"print");
+  if(l)$("editores").replaceChildren(editor(l));
+  $("dAdd").showModal();$("dAdd").scrollTop=0;
+}
+function aba(a){
+  document.querySelectorAll("#abas button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.aba===a));
+  $("painelPrint").hidden=a!=="print";
+  if(editando){$("salvar").hidden=false;return;}
+  if(a==="manual"){$("editores").replaceChildren(editor({cidade:"São Paulo",estado:"SP"}));$("salvar").hidden=false;}
+  else{$("editores").replaceChildren();$("salvar").hidden=true;
+    if(!cfg().key)$("avisoPrint").textContent="Pra ler prints, adicione a chave da Anthropic nas configurações. Enquanto isso, use Escrever.";}
+}
+$("abas").addEventListener("click",e=>{const b=e.target.closest("[data-aba]");if(b)aba(b.dataset.aba);});
+$("btnAdd").onclick=()=>abrirAdd();
 
-document.getElementById("sortear").addEventListener("click", ()=>{
-  const lista = filtrados();
-  if(!lista.length) return;
-  const l = lista[Math.floor(Math.random()*lista.length)];
-  const el = document.getElementById("l-"+l.id);
-  el.querySelector("details").open = true;
-  el.classList.remove("destaque"); void el.offsetWidth; el.classList.add("destaque");
-  el.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"center"});
+function reduzir(file){return new Promise((ok,erro)=>{const img=new Image();img.onload=()=>{
+  const k=Math.min(1,1400/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);
+  c.getContext("2d").drawImage(img,0,0,c.width,c.height);const url=c.toDataURL("image/jpeg",.82);ok({url,base64:url.split(",")[1]});};
+  img.onerror=()=>erro(new Error("imagem inválida"));img.src=URL.createObjectURL(file);});}
+$("arquivos").addEventListener("change",async e=>{
+  const fs=[...e.target.files].slice(0,10); imagens=await Promise.all(fs.map(reduzir));
+  $("previas").innerHTML=imagens.map(i=>`<img src="${i.url}" alt="">`).join("");
+  $("avisoPrint").textContent=e.target.files.length>10?"Só os 10 primeiros foram incluídos.":"";
+  $("lerPrints").hidden=!imagens.length||!cfg().key;$("editores").replaceChildren();$("salvar").hidden=true;
 });
 
-fetch("lugares.json", {cache:"no-store"})
-  .then(r=>r.json())
-  .then(dados=>{
-    LUGARES = dados.map((l,i)=>({id: l.id || i, ...l}));
-    const quero = LUGARES.filter(l=>(l.status||"quero-ir")==="quero-ir").length;
-    document.getElementById("total").textContent = `${quero} lugares na fila, ${LUGARES.length-quero} já riscados.`;
-    desenhar();
-  })
-  .catch(()=>{
-    document.getElementById("total").textContent = "Não consegui ler o lugares.json. Abra pelo GitHub Pages (ou um servidor local), não direto do arquivo.";
-  });
+const PROMPT=`As imagens são prints (quase sempre posts ou perfis do Instagram) de lugares que quero visitar.
+Para cada lugar distinto, crie um objeto. Responda APENAS com um array JSON, sem texto antes ou depois.
+Campos:
+- print: índice (a partir de 0) da imagem de onde veio
+- nome
+- tipo: um de bar, restaurante, cafe, balada, cultura, ar_livre, doce
+- ocasioes: um ou mais de date, amigos, visita, sozinho, familia, trabalho. Romântico/intimista = date; animado/mesas grandes = amigos; clássico, turístico ou "a cara de SP" = visita; café/livraria/calmo = sozinho; almoço/crianças/espaçoso = familia; perto de escritório/happy hour = trabalho
+- bairro, cidade, estado (UF 2 letras), endereco
+- horarios: curto, ex. "Ter–Sáb 18h–1h"
+- preco: "$" a "$$$$", só se der pra deduzir
+- instagram: @perfil
+- tags: 3 a 5 palavras curtas (comida, bebida, clima)
+- notas: dica útil do post (reserva, prato famoso, promoção, evento com data)
+Omita o campo que não aparecer. Não invente endereço nem horário. Não use emojis.`;
+
+$("lerPrints").onclick=async()=>{
+  const b=$("lerPrints"),av=$("avisoPrint");b.disabled=true;b.textContent="Lendo…";av.className="aviso";av.textContent="Isso leva uns 20 a 40 segundos.";
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":cfg().key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:MODELO,max_tokens:4000,messages:[{role:"user",content:[...imagens.map(i=>({type:"image",source:{type:"base64",media_type:"image/jpeg",data:i.base64}})),{type:"text",text:PROMPT}]}]})});
+    const data=await r.json(); if(!r.ok)throw new Error(data?.error?.message||("API "+r.status));
+    const txt=data.content.filter(c=>c.type==="text").map(c=>c.text).join("");
+    const achados=JSON.parse(txt.slice(txt.indexOf("["),txt.lastIndexOf("]")+1)).filter(x=>x&&x.nome);
+    if(!achados.length){av.textContent="Nenhum lugar encontrado nesses prints. Tente outro ou use Escrever.";return;}
+    av.textContent=achados.length===1?"Encontrei 1 lugar. Confira antes de salvar.":`Encontrei ${achados.length} lugares. Confira antes de salvar.`;
+    $("editores").replaceChildren(...achados.map(x=>{const d=editor(x,imagens[x.print]?.url||"");d.dataset.print=x.print??"";return d;}));
+    $("salvar").hidden=false;
+  }catch(err){av.className="aviso erro";av.textContent="Não foi possível ler: "+err.message;}
+  finally{b.disabled=false;b.textContent="Ler prints";}
+};
+
+async function geocodificar(o){
+  const qs=[[o.endereco,o.cidade,o.estado],[o.nome,o.bairro,o.cidade],[o.bairro,o.cidade,o.estado]].map(p=>p.filter(Boolean).join(", ")).filter(q=>q.includes(","));
+  for(const q of qs){
+    try{const [p]=await (await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&q="+encodeURIComponent(q))).json();
+      if(p)return{lat:+(+p.lat).toFixed(6),lng:+(+p.lon).toFixed(6)};}catch{}
+    await new Promise(r=>setTimeout(r,1100));
+  }
+  return {};
+}
+
+$("salvar").onclick=async()=>{
+  const b=$("salvar");b.disabled=true;b.textContent="Salvando…";
+  try{
+    if(editando){
+      const o=lerEditor($("editores").firstElementChild);if(!o.nome)throw new Error("preencha o nome");
+      const mudou=o.endereco!==editando.endereco||o.bairro!==editando.bairro||o.cidade!==editando.cidade;
+      const geo=mudou?await geocodificar(o):{};
+      await commitLugares(d=>d.map(x=>x.id===editando.id?{id:x.id,foto:x.foto,status:x.status,criadoEm:x.criadoEm,lat:x.lat,lng:x.lng,...o,...geo}:x),`edita ${o.nome}`);
+      toast("Alterações salvas");
+    }else{
+      const eds=[...$("editores").children].filter(d=>!d.querySelector(".incluir")||d.querySelector(".incluir").checked);
+      const novos=[],fotos={};
+      for(const d of eds){
+        const o=lerEditor(d);if(!o.nome)continue;const p=d.dataset.print;
+        if(p!==undefined&&p!==""&&imagens[p]){
+          if(!fotos[p]){fotos[p]=await subirImagem(imagens[p].base64,`${Date.now()}-${slug(o.nome)}.jpg`);fotosLocais[fotos[p]]=imagens[p].url;}
+          o.foto=fotos[p];
+        }
+        Object.assign(o,await geocodificar(o));
+        novos.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),...o,status:"quero-ir",criadoEm:Date.now()});
+      }
+      if(!novos.length)throw new Error("nenhum lugar selecionado");
+      await commitLugares(d=>[...d,...novos],`adiciona ${novos.map(n=>n.nome).join(", ")}`);
+      toast(novos.length===1?"Adicionado ao acervo":`${novos.length} lugares adicionados`);
+    }
+    $("dAdd").close();
+  }catch(err){toast("Erro: "+err.message,4500);}
+  finally{b.disabled=false;b.textContent="Salvar";}
+};
+
+/* ---------- Config ---------- */
+function abrirConfig(){const c=cfg();$("cOwner").value=c.owner;$("cRepo").value=c.repo;$("cToken").value=c.token;$("cKey").value=c.key;$("avisoConfig").textContent="";$("dConfig").showModal();}
+$("btnConfig").onclick=abrirConfig;
+$("salvarConfig").onclick=async()=>{
+  ["owner","repo","token","key"].forEach(k=>store.set(k,$("c"+k[0].toUpperCase()+k.slice(1)).value.trim()));
+  const av=$("avisoConfig");av.className="aviso";av.textContent="Testando…";
+  try{await lerRemoto();av.textContent="Conectado.";await carregar();setTimeout(()=>$("dConfig").close(),600);}
+  catch(e){av.className="aviso erro";av.textContent="O GitHub recusou. Confira usuário, repositório e token. ("+e.message+")";}
+};
+
+carregar();
 </script>
 </body>
 </html>

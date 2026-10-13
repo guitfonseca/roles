@@ -1,25 +1,16 @@
-# Onde a gente vai?
+# rolê 🪩
 
-Lista pessoal de bares e rolês, publicada no GitHub Pages.
+Acervo pessoal de bares e lugares. Abre em "Qual é a sua vibe hoje?", sugere lugares em cards e mostra tudo no mapa.
 
-## Como adicionar lugares
+## Subir no GitHub Pages
+1. Crie um repositório (ex.: `role`) e suba `index.html` e `lugares.json`.
+2. Settings → Pages → Deploy from branch → `main` / root.
+3. Abra `https://SEU-USUARIO.github.io/role/` no celular e adicione à tela de início.
 
-1. Manda os prints (posts do Instagram, Maps etc.) pro Claude junto com o prompt abaixo.
-2. Copia o JSON que ele devolver e cola dentro do array em `lugares.json`.
-3. Commit. O Pages atualiza em ~1 minuto.
+## Pra adicionar pelo celular (⚙️ no app)
+- **Token do GitHub**: github.com/settings/personal-access-tokens → Fine-grained → só este repositório → Contents: Read and write.
+- **Chave da Anthropic** (opcional, pra ler prints): console.anthropic.com → API Keys. Cada print custa centavos.
 
-### Prompt
+Os dois ficam só no navegador do seu celular, nunca no repositório.
 
-```
-Extraia cada lugar destes prints como objetos JSON (só o array, sem texto).
-Campos: id (slug), nome, tipo (bar|restaurante|cafe|balada|cultura|ar_livre|doce),
-ocasioes (date|amigos|visita|sozinho|familia|trabalho — escolha as que fazem sentido
-pelo clima do lugar), bairro, cidade, estado (UF), endereco, horarios, preco ($ a $$$$),
-instagram (@), tags (3–5 palavras curtas), notas (dica útil se houver),
-status: "quero-ir", adicionado: data de hoje.
-Se um campo não aparece no print, omita — não invente horário nem endereço.
-```
-
-## Marcar como "já fui"
-
-Troca `"status": "quero-ir"` por `"status": "ja-fui"`. O lugar sai da lista padrão e aparece riscado no filtro "Já fui".
+Cada lugar salvo vira um commit em `lugares.json`; os prints vão pra pasta `prints/`. O site leva ~1 min pra refletir pra quem abre sem token.
