@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Onde a gente vai?</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍻</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --placa:#1F4396; --placa-ink:#FFFFFF; --papel:#EEF1F4; --tinta:#161A22;
+  --sinal:#F2C230; --cinza:#5D6573; --linha:#CBD2DB; --fundo-item:#FFFFFF;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --placa:#2C56B8; --papel:#12151B; --tinta:#E9ECF1; --cinza:#98A1AF;
+    --linha:#2A303A; --fundo-item:#1A1E26;
+  }
+}
+:root[data-theme="dark"]{
+  --placa:#2C56B8; --papel:#12151B; --tinta:#E9ECF1; --cinza:#98A1AF;
+  --linha:#2A303A; --fundo-item:#1A1E26;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--papel);color:var(--tinta);
+  font-family:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-variation-settings:"wdth" 100;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:20px 18px 64px}
+
+/* Placa de rua — o elemento marcante */
+.placa{background:var(--placa);color:var(--placa-ink);border-radius:10px;
+  padding:18px 20px 16px;border:3px solid var(--placa);
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.9);margin:8px 0 22px}
+.placa small{display:block;font-size:.95rem;opacity:.85;font-variation-settings:"wdth" 100}
+.placa h1{margin:2px 0 0;font-size:clamp(2.2rem,9vw,3.6rem);line-height:.95;
+  font-weight:800;font-variation-settings:"wdth" 68;letter-spacing:-.01em}
+.placa p{margin:10px 0 0;font-size:.95rem;opacity:.9}
+
+.sorteio{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
+  background:var(--sinal);color:#161A22;border:0;border-radius:999px;
+  padding:14px 18px;font:inherit;font-weight:700;font-size:1.05rem;cursor:pointer}
+.sorteio:active{transform:scale(.98)}
+
+.busca{width:100%;margin:18px 0 6px;padding:12px 14px;font:inherit;
+  border:1.5px solid var(--linha);border-radius:10px;background:var(--fundo-item);color:var(--tinta)}
+.filtros{margin-top:10px}
+.grupo{display:flex;gap:8px;overflow-x:auto;padding:6px 0;scrollbar-width:none}
+.grupo::-webkit-scrollbar{display:none}
+.grupo span{flex:none;color:var(--cinza);font-size:.85rem;align-self:center;min-width:64px}
+.chip{flex:none;border:1.5px solid var(--linha);background:transparent;color:var(--tinta);
+  border-radius:999px;padding:6px 12px;font:inherit;font-size:.9rem;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--placa);border-color:var(--placa);color:#fff}
+
+.contagem{color:var(--cinza);font-size:.9rem;margin:18px 0 6px}
+.lista{list-style:none;margin:0;padding:0}
+.lugar{border-top:1.5px solid var(--linha)}
+.lugar:last-child{border-bottom:1.5px solid var(--linha)}
+.lugar details>summary{list-style:none;cursor:pointer;padding:14px 2px;display:grid;
+  grid-template-columns:1fr auto;gap:2px 12px;align-items:baseline}
+.lugar summary::-webkit-details-marker{display:none}
+.nome{font-size:1.35rem;font-weight:700;font-variation-settings:"wdth" 80;line-height:1.15}
+.bairro{justify-self:end;background:var(--placa);color:#fff;font-size:.78rem;font-weight:600;
+  padding:2px 8px;border-radius:4px;white-space:nowrap;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7)}
+.resumo{grid-column:1/-1;color:var(--cinza);font-size:.92rem}
+.foi{color:var(--cinza)}
+.foi .nome{text-decoration:line-through;text-decoration-thickness:1.5px}
+.corpo{padding:0 2px 18px;display:grid;gap:10px}
+.corpo dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:.95rem}
+.corpo dt{color:var(--cinza)}
+.corpo dd{margin:0}
+.nota{margin:0;padding-left:12px;border-left:3px solid var(--sinal)}
+.links{display:flex;gap:8px;flex-wrap:wrap}
+.links a{color:var(--tinta);border:1.5px solid var(--linha);border-radius:8px;
+  padding:7px 12px;text-decoration:none;font-weight:600;font-size:.9rem}
+.destaque{animation:pisca 1.6s ease-out}
+@keyframes pisca{0%{background:var(--sinal)}100%{background:transparent}}
+.vazio{padding:28px 4px;color:var(--cinza)}
+button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible{outline:3px solid var(--sinal);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.destaque{animation:none;outline:3px solid var(--sinal)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="placa">
+    <small>Caderninho do Gui</small>
+    <h1>Onde a gente vai?</h1>
+    <p id="total">Carregando lugares…</p>
+  </header>
+
+  <button class="sorteio" id="sortear">🎲 Escolhe um pra mim</button>
+
+  <input class="busca" id="busca" type="search" placeholder="Buscar por nome, bairro, comida…" aria-label="Buscar">
+
+  <div class="filtros" id="filtros"></div>
+
+  <p class="contagem" id="contagem"></p>
+  <ul class="lista" id="lista"></ul>
+</div>
+
+<script>
+const ROTULOS = {
+  ocasioes:{date:"💘 Date",amigos:"🍻 Com amigos",visita:"🧳 Receber visita",sozinho:"🎧 Sozinho",familia:"👨‍👩‍👧 Família",trabalho:"💼 Happy hour"},
+  tipo:{bar:"Bar",restaurante:"Restaurante",cafe:"Café",balada:"Balada",cultura:"Cultura",ar_livre:"Ar livre",doce:"Doces"},
+  status:{"quero-ir":"Quero ir","ja-fui":"Já fui"}
+};
+const estado = {busca:"", ocasioes:null, tipo:null, cidade:null, status:"quero-ir"};
+let LUGARES = [];
+
+const rotulo = (grupo, v) => (ROTULOS[grupo] && ROTULOS[grupo][v]) || v;
+const norm = s => (s||"").toString().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+
+function filtrados(){
+  const q = norm(estado.busca);
+  return LUGARES.filter(l =>
+    (!estado.ocasioes || (l.ocasioes||[]).includes(estado.ocasioes)) &&
+    (!estado.tipo || l.tipo === estado.tipo) &&
+    (!estado.cidade || l.cidade === estado.cidade) &&
+    (!estado.status || (l.status||"quero-ir") === estado.status) &&
+    (!q || norm([l.nome,l.bairro,l.cidade,l.notas,(l.tags||[]).join(" ")].join(" ")).includes(q))
+  );
+}
+
+function grupoChips(titulo, chave, valores){
+  const div = document.createElement("div");
+  div.className = "grupo";
+  div.innerHTML = `<span>${titulo}</span>`;
+  const todos = [null, ...valores];
+  todos.forEach(v=>{
+    const b = document.createElement("button");
+    b.className = "chip";
+    b.textContent = v === null ? "Tudo" : rotulo(chave, v);
+    b.setAttribute("aria-pressed", estado[chave] === v);
+    b.onclick = ()=>{ estado[chave] = v; desenhar(); };
+    div.appendChild(b);
+  });
+  return div;
+}
+
+function desenharFiltros(){
+  const uniq = arr => [...new Set(arr.filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt"));
+  const f = document.getElementById("filtros");
+  f.innerHTML = "";
+  f.append(
+    grupoChips("Pra quê", "ocasioes", uniq(LUGARES.flatMap(l=>l.ocasioes||[]))),
+    grupoChips("O quê", "tipo", uniq(LUGARES.map(l=>l.tipo))),
+    grupoChips("Onde", "cidade", uniq(LUGARES.map(l=>l.cidade))),
+    grupoChips("Status", "status", ["quero-ir","ja-fui"])
+  );
+}
+
+function itemHTML(l){
+  const linhas = [
+    ["Endereço", l.endereco], ["Horários", l.horarios], ["Preço", l.preco],
+    ["Pra quê", (l.ocasioes||[]).map(o=>rotulo("ocasioes",o)).join(", ")]
+  ].filter(([,v])=>v);
+  const maps = l.maps || (l.endereco ? "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(l.nome+" "+l.endereco) : "");
+  const insta = l.instagram ? "https://instagram.com/"+l.instagram.replace(/^@/,"") : "";
+  const resumo = [rotulo("tipo",l.tipo), l.preco, (l.tags||[]).slice(0,3).join(", ")].filter(Boolean).join(" — ");
+  return `
+  <li class="lugar ${l.status==="ja-fui"?"foi":""}" id="l-${l.id}">
+    <details>
+      <summary>
+        <span class="nome">${l.nome}</span>
+        <span class="bairro">${l.bairro || l.cidade || ""}</span>
+        <span class="resumo">${resumo}</span>
+      </summary>
+      <div class="corpo">
+        ${linhas.length?`<dl>${linhas.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl>`:""}
+        ${l.notas?`<p class="nota">${l.notas}</p>`:""}
+        <div class="links">
+          ${maps?`<a href="${maps}" target="_blank" rel="noopener">Abrir no Maps</a>`:""}
+          ${insta?`<a href="${insta}" target="_blank" rel="noopener">${l.instagram}</a>`:""}
+          ${l.site?`<a href="${l.site}" target="_blank" rel="noopener">Site</a>`:""}
+        </div>
+      </div>
+    </details>
+  </li>`;
+}
+
+function desenhar(){
+  desenharFiltros();
+  const lista = filtrados();
+  document.getElementById("contagem").textContent =
+    lista.length === 1 ? "1 lugar" : `${lista.length} lugares`;
+  document.getElementById("lista").innerHTML = lista.length
+    ? lista.map(itemHTML).join("")
+    : `<li class="vazio">Nada com esses filtros. Toque em "Tudo" em algum grupo pra abrir a busca.</li>`;
+}
+
+document.getElementById("busca").addEventListener("input", e=>{ estado.busca = e.target.value; desenhar(); });
+
+document.getElementById("sortear").addEventListener("click", ()=>{
+  const lista = filtrados();
+  if(!lista.length) return;
+  const l = lista[Math.floor(Math.random()*lista.length)];
+  const el = document.getElementById("l-"+l.id);
+  el.querySelector("details").open = true;
+  el.classList.remove("destaque"); void el.offsetWidth; el.classList.add("destaque");
+  el.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"center"});
+});
+
+fetch("lugares.json", {cache:"no-store"})
+  .then(r=>r.json())
+  .then(dados=>{
+    LUGARES = dados.map((l,i)=>({id: l.id || i, ...l}));
+    const quero = LUGARES.filter(l=>(l.status||"quero-ir")==="quero-ir").length;
+    document.getElementById("total").textContent = `${quero} lugares na fila, ${LUGARES.length-quero} já riscados.`;
+    desenhar();
+  })
+  .catch(()=>{
+    document.getElementById("total").textContent = "Não consegui ler o lugares.json. Abra pelo GitHub Pages (ou um servidor local), não direto do arquivo.";
+  });
+</script>
+</body>
+</html>
