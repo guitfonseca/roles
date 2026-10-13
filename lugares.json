@@ -25,5 +25,24 @@
     "lng": -46.648497,
     "status": "quero-ir",
     "criadoEm": 1791927942630
+  },
+  {
+    "id": "mv77qcbovv88",
+    "nome": "Lobozó",
+    "tipo": "restaurante",
+    "preco": "$$",
+    "bairro": "Vila Madalena",
+    "cidade": "São Paulo",
+    "estado": "SP",
+    "endereco": "Rua Medeiros de Albuquerque, 436, São Paulo, Brazil",
+    "instagram": "@lobozocozinha",
+    "ocasioes": [
+      "amigos",
+      "sozinho"
+    ],
+    "lat": -23.546496,
+    "lng": -46.691124,
+    "status": "quero-ir",
+    "criadoEm": 1791928112100
   }
 ]
