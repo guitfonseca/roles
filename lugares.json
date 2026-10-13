@@ -1,1 +1,29 @@
-[]
+[
+  {
+    "id": "mv77mpk6vltd",
+    "nome": "Dōmo",
+    "tipo": "bar",
+    "bairro": "Vila Buarque",
+    "cidade": "São Paulo",
+    "estado": "SP",
+    "endereco": "Rua Major Sertório, 452",
+    "horarios": "Ter–Qui 19h–24h; Sex–Sáb 19h–1h",
+    "instagram": "@domobarsp",
+    "notas": "Reservas pelo WhatsApp (11) 97570-9056. Programação de DJs e música ao vivo nos destaques. Irmão do Takko Café.",
+    "tags": [
+      "bar e restaurante",
+      "DJ",
+      "jazz",
+      "drinks"
+    ],
+    "ocasioes": [
+      "date",
+      "amigos"
+    ],
+    "foto": "prints/1791927939801-domo.jpg",
+    "lat": -23.545321,
+    "lng": -46.648497,
+    "status": "quero-ir",
+    "criadoEm": 1791927942630
+  }
+]
